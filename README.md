@@ -11,7 +11,6 @@ This is a fully functional e-commerce website where users can log in, browse pro
 
 ### Admin Features:
 - **Product Management:** Admins can add new products to the collection or remove existing ones through the admin panel.
-- **Security:** The admin panel is securely hosted and requires authentication for access. The admin panel's URL is not publicly shared for security purposes.
 
 ## Technologies Used:
 - **Frontend:** React.js, HTML, CSS
@@ -19,4 +18,9 @@ This is a fully functional e-commerce website where users can log in, browse pro
 - **Database:** MongoDB
 - **Deployment:** Render
 
-## Project Structure:
+## To run this on your system 
+
+  Make a folder and copy the whole repository there .
+  After that go to the backend directory and change the mongoose atlas location to your location and run the following command "npm install" and "node index.js"
+  after that come to the frontend repository ans comment out the url fetching link with the hosted link , in all the files and run "npm install" and "npm start"
+  
