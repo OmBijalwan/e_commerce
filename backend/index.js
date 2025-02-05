@@ -1,3 +1,4 @@
+require("dotenv").config();
 const port =4000;
 const express =require("express");
 const app= express();
@@ -6,12 +7,22 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors= require("cors");
+//changes
+const Razorpay = require("razorpay");                                               
+const connectDB = require("./database/db");
+
+const Product = require("./models/Product");
+const Users = require("./models/User");
+const Payment = require("./models/Payment");
+const payment =require("./routes/payment") 
+connectDB();
+//
 
 app.use(express.json());
 app.use(cors());
 
-// Databse Connected to Mongo db atlas
-mongoose.connect("mongodb+srv://ombijalwanEcommerce:hK8mDjYLdgtiuUkU@cluster0.pbqvh.mongodb.net/e-commerce")
+// // Databse Connected to Mongo db atlas
+// mongoose.connect("mongodb+srv://ombijalwanEcommerce:hK8mDjYLdgtiuUkU@cluster0.pbqvh.mongodb.net/e-commerce")
 
 //API creation
 
@@ -41,40 +52,40 @@ app.post("/upload",upload.single('product'),(req,res)=>{
 
 // Schema for crwating Products
 
-const Product = mongoose.model("Product",{
-    id:{
-        type:Number,
-        required:true,
-    },
-    name:{
-        type:String,
-        required:true,
-    },
-    image:{
-        type:String,
-        reqired:true,
-    },
-    category:{
-        type:String,
-        required:true,
-    },
-    new_price:{
-        type:String,
-        required:true,
-    },
-    old_price:{
-        type:Number,
-        required:true,
-    },
-    date:{
-        type:Date,
-        default:Date.now,
-    },
-    available:{
-        type:Boolean,
-        default:true,
-    },
-})
+// const Product = mongoose.model("Product",{
+//     id:{
+//         type:Number,
+//         required:true,
+//     },
+//     name:{
+//         type:String,
+//         required:true,
+//     },
+//     image:{
+//         type:String,
+//         reqired:true,
+//     },
+//     category:{
+//         type:String,
+//         required:true,
+//     },
+//     new_price:{
+//         type:String,
+//         required:true,
+//     },
+//     old_price:{
+//         type:Number,
+//         required:true,
+//     },
+//     date:{
+//         type:Date,
+//         default:Date.now,
+//     },
+//     available:{
+//         type:Boolean,
+//         default:true,
+//     },
+// })
 
 app.post('/addproduct',async(req,res)=>{
     let products = await Product.find({});
@@ -125,25 +136,25 @@ app.get('/allproducts',async(req,res)=>{
     res.send(products);
 })
 
-const Users = mongoose.model('Users',{
-    name:{
-        type:String,
-    },
-    email:{
-        type:String,
-        unique:true,
-    },
-    password:{
-        type:String,
-    },
-    cartData:{
-        type:Object,
-    },
-    date:{
-        type:Date,
-        default:Date.now,
-    }
-})
+// const Users = mongoose.model('Users',{
+//     name:{
+//         type:String,
+//     },
+//     email:{
+//         type:String,
+//         unique:true,
+//     },
+//     password:{
+//         type:String,
+//     },
+//     cartData:{
+//         type:Object,
+//     },
+//     date:{
+//         type:Date,
+//         default:Date.now,
+//     }
+// })
 
 // Creating Endpoint for registering the user
 
@@ -258,6 +269,8 @@ app.post('/getcart',fetchUser, async (req,res)=>{
     res.json(userData.cartData);
 })
 
+//change
+app.use('/api/payment',payment);
 
 app.listen(port,(error)=>{
     if(!error){
