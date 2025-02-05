@@ -1,5 +1,5 @@
 import React, {createContext,useState,useEffect} from 'react';
-
+import { toast } from 'react-hot-toast';
 export const ShopContext = createContext(null);
 
 const getDefaultCart =() =>{
@@ -91,8 +91,77 @@ const ShopContextProvider =(props) =>{
         }
         return totalItem;
     }
+    const handlePayment = async () => {
+        try {
+            // Step 1: Create order on the backend
+            const res = await fetch("https://e-commerce-3q3y.onrender.com/api/payment/order", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    amount: getTotalCartAmount() // Get the total cart amount
+                })
+            });
     
-    const contextValue ={getTotalCartItems,getTotalCartAmount,all_product, cartItems,addToCart,removeFromCart};
+            const data = await res.json();
+            console.log(data);
+    
+            // Step 2: Proceed with Razorpay payment after receiving order details
+            handlePaymentVerify(data.data); // Pass order details to the verify function
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    
+    // handlePaymentVerify Function: Handles Razorpay payment and verifies the payment
+    const handlePaymentVerify = async (data) => {
+        const options = {
+            key: 'rzp_test_drkSRartjNmgLR', // Your Razorpay Key ID
+            amount: data.amount, // Total amount in paise
+            currency: data.currency, // Currency
+            name: "E-Commerce",
+            description: "Test Mode",
+            order_id: data.id, // Order ID from Razorpay API response
+            handler: async (response) => {
+                console.log("response", response);
+                try {
+                    // Step 3: Verify payment on the backend after successful payment
+                    const verifyRes = await fetch("https://e-commerce-3q3y.onrender.com/api/payment/verify", {
+                        method: "POST",
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+    
+                    const verifyData = await verifyRes.json();
+    
+                    if (verifyData.message) {
+                        // Show success message after verification
+                        toast.success(verifyData.message);
+                        setCartItems(getDefaultCart());
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+            theme: {
+                color: "#5f63b8"
+            }
+        };
+    
+        // Open Razorpay payment window
+        const rzp1 = new window.Razorpay(options);
+        rzp1.open();
+    };
+    
+    
+    const contextValue ={getTotalCartItems,getTotalCartAmount,all_product, cartItems,addToCart,removeFromCart,handlePayment};
 
     return (
         <ShopContext.Provider value={contextValue}>
